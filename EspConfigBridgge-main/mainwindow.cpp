@@ -437,7 +437,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
     // int32_t velPromedio = 0;
     float accelPromedio = 0;
     float velPromedio = 0;
-    static uint8_t firstTime = 0;
+    static uint8_t timeoutSpeed[3] = {0, 0, 0};
 
     for(int i = 1; i<length; i++){
         if(isalnum(datosRx[i]))
@@ -577,21 +577,62 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             // Accel[1] = (Accel[1] - gravedad_y); //- gravedad_y
             // Accel[2] = Accel[2];
 
-            // Actualizar velocidad
-            if (qAbs(Gyro[0]) < 0.03 && qAbs(Gyro[1]) < 0.03 && qAbs(Gyro[2]) < 0.03) {
-                velocity.x = 0;
-                velocity.y = 0;
-                velocity.z = 0;
+            // Actualizar velocidad y posicion
+            accelPromedio = (lineal_accel.x + prevAccel[0])/2;
+            if (qAbs(accelPromedio) > 0.007) {
+                timeoutSpeed[0] = 0;
+                velocity.x += accelPromedio * 0.01f;
+                velPromedio = (velocity.x + prevVel[0])/2;
+                position.x += velPromedio * 0.01f;
             } else {
-                velocity.x += lineal_accel.x * 0.01f;
-                velocity.y += lineal_accel.y * 0.01f;
-                velocity.z += lineal_accel.z * 0.01f;
+                timeoutSpeed[0]++;
+                if (timeoutSpeed[0] == 5) {
+                    velocity.x = 0;
+                }
             }
+            accelPromedio = 0;
 
-            // Actualizar posición
-            position.x += velocity.x * 0.01f;
-            position.y += velocity.y * 0.01f;
-            position.z += velocity.z * 0.01f;
+            accelPromedio = (lineal_accel.y + prevAccel[1])/2;
+            if (qAbs(accelPromedio) > 0.007) {
+                timeoutSpeed[1] = 0;
+                velocity.y += accelPromedio * 0.01f;
+                velPromedio = (velocity.y + prevVel[1])/2;
+                position.y += velPromedio * 0.01f;
+            } else {
+                timeoutSpeed[1]++;
+                if (timeoutSpeed[1] == 5) {
+                    velocity.y = 0;
+                }
+            }
+            accelPromedio = 0;
+
+            accelPromedio = (lineal_accel.z + prevAccel[2])/2;
+            if (qAbs(accelPromedio) > 0.007) {
+                timeoutSpeed[2] = 0;
+                velocity.z += accelPromedio * 0.01f;
+                velPromedio = velocity.z + prevVel[2];
+                position.z += velPromedio * 0.01f;
+            } else {
+                timeoutSpeed[2]++;
+                if (timeoutSpeed[2] == 5) {
+                    velocity.z = 0;
+                }
+            }
+            accelPromedio = 0;
+
+            // if (qAbs(lineal_accel.y) > 0.007) {
+            //     velocity.y += lineal_accel.y * 0.01f;
+            //     position.y += velocity.y * 0.01f;
+            // }
+
+            // if (qAbs(lineal_accel.z) > 0.007) {
+            //     velocity.z += lineal_accel.z * 0.01f;
+            //     position.z += velocity.z * 0.01f;
+            // }
+
+            prevVel[0] = velocity.x;
+            prevVel[1] = velocity.y;
+            prevVel[2] = velocity.z;
 
             // for (uint8_t i=0; i<3; i++){
             //     prevVel[i] = Vel[i];
@@ -610,17 +651,17 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             //     accelPromedio = 0;
             // }
 
-            // prevAccel[0] = Accel[0];
-            // prevAccel[1] = Accel[1];
-            // prevAccel[2] = Accel[2];
+            prevAccel[0] = lineal_accel.x;
+            prevAccel[1] = lineal_accel.y;
+            prevAccel[2] = lineal_accel.z;
 
             // ui->txtBrowserCMD->append(QString("--> Gyro X= %1").arg(Gyro[0]));
             // ui->txtBrowserCMD->append(QString("--> Gyro Y= %1").arg(Gyro[1]));
             // ui->txtBrowserCMD->append(QString("--> Gyro Z= %1").arg(Gyro[2]));
 
-            ui->gyro_0->display(QString("%1").arg((int32_t)Gyro[0]));
-            ui->gyro_1->display(QString("%1").arg((int32_t)Gyro[1]));
-            ui->gyro_2->display(QString("%1").arg((int32_t)Gyro[2]));
+            ui->gyro_0->display(QString("%1").arg((int32_t)(Gyro[0]*100)));
+            ui->gyro_1->display(QString("%1").arg((int32_t)(Gyro[1]*100)));
+            ui->gyro_2->display(QString("%1").arg((int32_t)(Gyro[2]*100)));
 
             // ui->txtBrowserCMD->append(QString("--> Accel X= %1").arg(Accel[0]));
             // ui->txtBrowserCMD->append(QString("--> Accel Y= %1").arg(Accel[1]));
