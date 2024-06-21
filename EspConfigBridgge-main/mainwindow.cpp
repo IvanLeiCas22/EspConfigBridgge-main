@@ -478,7 +478,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
                 myWorker.u8[1] = datosRx[i+3];
                 Accel[i/2] = myWorker.i16[0];
                 if (i/2 == 2) {
-                    Accel[i/2] = Accel[i/2] /15716;
+                    Accel[i/2] = Accel[i/2] /15716; // revisar esto, el resultado tiene que ser cercano a 1
                 } else {
                     Accel[i/2] = Accel[i/2] /16384;
                 }
@@ -505,9 +505,13 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             gravity.y = (2*q.q1*q.q2 + 2*q.q3*q.q0) * gravity_earth.x + (1 - 2*q.q1*q.q1 - 2*q.q3*q.q3) * gravity_earth.y + (2*q.q2*q.q3 - 2*q.q1*q.q0) * gravity_earth.z;
             gravity.z = (2*q.q1*q.q3 - 2*q.q2*q.q0) * gravity_earth.x + (2*q.q2*q.q3 + 2*q.q1*q.q0) * gravity_earth.y + (1 - 2*q.q1*q.q1 - 2*q.q2*q.q2) * gravity_earth.z;
 
-            lineal_accel.x = Accel[0] - gravity.x;
-            lineal_accel.y = Accel[1] - gravity.y;
+            lineal_accel.x = Accel[0] + gravity.x;
+            lineal_accel.y = Accel[1] + gravity.y;
             lineal_accel.z = Accel[2] - gravity.z;
+
+            // lineal_accel.x = Accel[0];
+            // lineal_accel.y = Accel[1];
+            // lineal_accel.z = Accel[2];
 
             // if (!firstTime) {
             //     firstTime = 1;
@@ -637,8 +641,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             ui->pitch_0->display(QString("%1").arg((int32_t)pitch));
             ui->roll_0->display(QString("%1").arg((int32_t)roll));
             ui->yaw_0->display(QString("%1").arg((int32_t)yaw));
-            ui->contraAccel_x->display(QString("%1").arg((int32_t)(lineal_accel.x * 100)));
-            ui->contraAccel_y->display(QString("%1").arg((int32_t)(lineal_accel.y * 100)));
+            ui->contraAccel_x->display(QString("%1").arg((int32_t)(Accel[0] * 1000)));
+            ui->contraAccel_y->display(QString("%1").arg((int32_t)(Accel[1] * 1000)));
 
             break;
 //        case GETSERVOANGLE://    GETSERVOANGLE=0xA8,

@@ -229,7 +229,7 @@ private:
     typedef struct {
         float x, y, z;
     } Vector3f;
-    Vector3f gravity_earth = {0, 0, 1}; // Assuming 1g in the z direction
+    Vector3f gravity_earth = {0, 0, 0.981}; // Assuming 1g in the z direction
     Vector3f gravity;
     Vector3f lineal_accel;
     Vector3f velocity;
