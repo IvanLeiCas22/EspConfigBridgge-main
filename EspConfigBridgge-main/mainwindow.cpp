@@ -574,7 +574,7 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             // Accel[2] = Accel[2];
 
             // Actualizar velocidad
-            if (qAbs(Gyro[0]) < 0.1 && qAbs(Gyro[1]) < 0.1 && qAbs(Gyro[2]) < 0.1) {
+            if (qAbs(Gyro[0]) < 0.03 && qAbs(Gyro[1]) < 0.03 && qAbs(Gyro[2]) < 0.03) {
                 velocity.x = 0;
                 velocity.y = 0;
                 velocity.z = 0;
